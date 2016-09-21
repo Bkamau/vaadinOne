@@ -4,13 +4,12 @@ import javax.servlet.annotation.WebServlet;
 
 import com.vaadin.annotations.Theme;
 import com.vaadin.annotations.VaadinServletConfiguration;
+import com.vaadin.event.FieldEvents;
+import com.vaadin.server.Page;
+import com.vaadin.server.UserError;
 import com.vaadin.server.VaadinRequest;
 import com.vaadin.server.VaadinServlet;
-import com.vaadin.ui.Button;
-import com.vaadin.ui.Label;
-import com.vaadin.ui.TextField;
-import com.vaadin.ui.UI;
-import com.vaadin.ui.VerticalLayout;
+import com.vaadin.ui.*;
 
 /**
  * This UI is the application entry point. A UI may either represent a browser window 
@@ -22,17 +21,40 @@ import com.vaadin.ui.VerticalLayout;
 @Theme("mytheme")
 public class MyUI extends UI {
 
+    private Notification notification;
+
     @Override
     protected void init(VaadinRequest vaadinRequest) {
         final VerticalLayout layout = new VerticalLayout();
         
         final TextField name = new TextField();
         name.setCaption("Type your name here:");
+        name .addTextChangeListener(new FieldEvents.TextChangeListener() {
+            @Override
+            public void textChange(FieldEvents.TextChangeEvent textChangeEvent) {
+                String text = name.getValue().toString();
+                if (text.equals("ben")){
+                    notification = new Notification("Did i see a BEN somewhere", "That word is not allowed");
+                    notification.show(Page.getCurrent());
+                }
+            }
+        });
+
 
         Button button = new Button("Click Me");
         button.addClickListener( e -> {
-            layout.addComponent(new Label("Thanks " + name.getValue() 
-                    + ", it works!"));
+
+            notification = new Notification("Did i see a BEN somewhere", "That word is not allowed");
+
+            if (name.getValue().contains("ben")){
+                notification.show(Page.getCurrent());
+
+            }else if (name.getValue().contains("benny")){
+                layout.addComponent(new Label("Thanks " + name.getValue() + ", it works!"));
+            }else{
+                name.setComponentError(new UserError("Marine 1 or 2"));
+            }
+
         });
         
         layout.addComponents(name, button);
